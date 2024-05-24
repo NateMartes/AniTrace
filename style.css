@@ -1,0 +1,23 @@
+*{
+    box-sizing: border-box;
+}
+body{
+    height: 500px;
+    overflow-y: scroll;
+    background-color: #141414c1;
+}
+.search{
+    display: flex;
+    column-gap: 3px;
+}
+#searchBar{
+    border-radius: 8px;
+}
+#searchBtn{
+    cursor: pointer;
+    border: none;
+    background-color: transparent;
+}
+.searchedAnime img{
+    max-width: 200px;
+}
