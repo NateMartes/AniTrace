@@ -3,7 +3,7 @@
     box-sizing: border-box;
 }
 body{
-    width: 250px;
+    width: 300px;
     height: 400px;
     display: flex;
     flex-direction: column;
@@ -15,14 +15,30 @@ body{
 main{
     overflow: auto;
 }
+.fadein{
+  animation: fadeIn 1s;  
+}
+@keyframes fadeIn {
+    from{
+        opacity: 0;
+        filter: blur(5px);
+    }
+    to {
+        opacity: 1;
+        filter: blur(0px);
+    }
+}
 .search{
     display: flex;
     column-gap: 3px;
-    margin: 2px;
+    margin: 0px;
+    max-width: 80vh;
 }
 #searchBar{
     border-radius: 8px;
     font-family: "Nunito","Sans Serif";
+    width: 80%;
+    font-size: 18px;
     
 }
 #searchBar:focus{
@@ -63,17 +79,68 @@ main{
 .loading{
     display: block;
 }
+.error{
+    display: none;
+    position: absolute;
+    top: 40%;
+    left: 10%;
+    align-items: center;
+    justify-content: center;
+    margin: 0;
+    
+}
+.error h3{
+    margin: 0;
+    font-size: 25px;
+    text-wrap: wrap;
+    text-align: center;
+}
 .searchedAnime{
     display: flex;
     flex-direction: column;
+    align-items: center;
     background-color: #1414141f;
     padding: 10px;
     box-shadow: 0px 0px 15px #279708;
+    margin: 15px;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+.searchedAnime:hover{
+    box-shadow: 0px 0px 15px #34ce09;
+    color: #34ce09;
 }
 .searchedAnime h3{
     margin: 5px;
     margin-left: 0px;
+    font-size: 18px;
+    align-self: flex-start;
+
 }
 .searchedAnime img{
     max-width: 200px;
+}
+footer{
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    background-color: #141414fb;
+    width: 100%;
+}
+.homeRow{
+    display: flex;
+    justify-content: space-evenly;
+}
+.homeRow a{
+    font-size: 20px;
+    color: #FFFFFF;
+    transition: all 0.5s;
+    height: 50px;
+    text-decoration: none;
+}
+.homeRow:visited{
+    color: #FFFFFF;
+}
+.homeRow a:hover{
+    color: #34ce09;
 }
