@@ -26,12 +26,14 @@ button.addEventListener("click", () => {
 
 function searchAnime(name, useData){
     removeSearchAnimes();
+    const spinner = document.getElementsByClassName("spinner")[0];
+    spinner.classList.toggle("loading");
     getAnimeData(name.toLowerCase()).then((data) => {
         useData(data);
     });
 }
 function addAnimeToHomeScreen(data){
-    console.log(data);
+    const main = document.getElementsByTagName("main")[0];
     data.forEach((anime) => {
         const name = anime.title;
         const image = anime.images.webp.image_url;
@@ -46,14 +48,19 @@ function addAnimeToHomeScreen(data){
         animeBanner.loading = "lazy";
         animeContainer.append(animeTitle);
         animeContainer.append(animeBanner);
-        document.body.append(animeContainer);
+        main.append(animeContainer);
+        
     });
+    const spinner = document.getElementsByClassName("spinner")[0];
+    spinner.classList.toggle("loading");
+    
 }
 function removeSearchAnimes(){
+    const main = document.getElementsByTagName("main")[0];
     const searchedAnimes = document.querySelectorAll(".searchedAnime");
     if (searchedAnimes){
         searchedAnimes.forEach((anime) => {
-            document.body.removeChild(anime);
+            main.removeChild(anime);
         });
     }
 }
