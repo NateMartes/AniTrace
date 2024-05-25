@@ -4,10 +4,7 @@
     "description": "Track your favorite Animes all in one place",
     "version": "1.0",
     "action": {
-      "default_popup": "popup.html",
+      "default_popup": "animeDetail.html",
       "default_icon": "no.png"
-    },
-    "icons":{
-      "16":"search.png"
     }
-  }
+}
