@@ -153,25 +153,49 @@ footer{
     padding-left: 15px;
     padding-right: 15px;
 }
-.header{
+.buttons{
     display: flex;
-    flex-direction: column;
-    justify-content: center;
+    position: relative;
     align-items: center;
-    position: relative;
-}
-#backBtn{
-    position: relative;
-    top: 0px;
-    left: 0;
-    align-self: flex-start;
+    justify-content: space-between;
+    padding-left: 5px;
+    padding-right: 5px;
+    margin: 5px;
 }
 #backBtn img{
     width: 22px;
+    transition: all 0.5s;
 }
-.header h2{
-    font-size: 25px;
-    margin: 0;
+#backBtn:hover img{
+    transform: scale(1.10);
+}
+#addAnimeBtn{
+    justify-self: flex-end;
+    background-color: #34ce09;
+    font-family: "Nunito","Sans Serif";
+    border-radius: 10px;
+    padding-left: 15px;
+    padding-right: 15px;
+    font-size: 15px;
+    border: 2px solid transparent;
+    color: #FFFFFF;
+    cursor: pointer;
+    transition: all 0.5s;
+}
+#addAnimeBtn:hover{
+    background-color: #38e708;
+    transform: scale(1.05);
+}
+.animeName{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.animeName h2{
+    text-align: center;
+    margin: 0px;
 }
 .animeImage{
     display: flex;
@@ -179,17 +203,22 @@ footer{
     align-items: center;
 }
 .animeImage img{
-    width: 225px;
-    height: 335px;
+    max-width: 225px;
+    max-height: 335px;
     background-color: black;
 }
-.animeSummary{
+.animeContent{
     background-color: #1414141f;
     padding: 10px;
     margin: 10px;
+    margin-top: 20px;
+    margin-bottom: 20px;
     border-radius: 10px;
     box-shadow: 0px 0px 15px #279708;
 }
-.animeSummary p{
+.animeContent p{
+    font-size: 15px;
+}
+.animeContent ul{
     font-size: 15px;
 }
