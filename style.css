@@ -115,12 +115,19 @@ main{
 .searchedAnime h3{
     margin: 5px;
     margin-left: 0px;
+    margin-bottom: 0px;
     font-size: 18px;
     align-self: flex-start;
 
 }
 .searchedAnime img{
     max-width: 200px;
+}
+.savedAnime{
+    align-self:flex-start;
+    font-size: 15px;
+    color: #34ce09;
+    margin: 5px;
 }
 footer{
     position: absolute;

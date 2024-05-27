@@ -2,7 +2,6 @@ async function getAnimeData(anime){
     try {
         const response = await fetch(`https://api.jikan.moe/v4/anime?q=${anime}&sfw`);
         if (!response.ok){
-            console.log("hit");
             const error = new Error(`Error : ${response.status}`);
             error.status = response.status;
             throw error;
@@ -49,7 +48,7 @@ function searchAnime(name, useData){
         }
         
     })
-    .catch(() => {
+    .catch((error) => {
         showErrorMsg("An Unkown Error Occured");
         console.log(error);
     });         
@@ -63,39 +62,53 @@ function showErrorMsg(message){
     errorContainer.style.display = "block";
 
 }
-function addAnimeToHomeScreen(data){
+async function addAnimeToHomeScreen(data){
     const main = document.getElementsByTagName("main")[0];
 
     let lastSearchedAnime = null;
-    data.forEach((anime) => {
-        console.log(anime);
-        let name = anime.title;
-        if (anime.title_english){
-            name = anime.title_english;
-        }
-        const image = anime.images.webp.image_url;
+    try{
+        await Promise.all(data.map(async (anime) => {
+            console.log(anime);
+            let name = anime.title_english || anime.title;
+            const image = anime.images.webp.image_url;
 
-        const animeContainer = document.createElement("div");
-        animeContainer.classList.add("searchedAnime");
-        animeContainer.addEventListener("click", (event) => {
-            clearDOM();
-            loadAnimePage(anime);
-        });
+            const animeContainer = document.createElement("div");
+            animeContainer.classList.add("searchedAnime");
+            animeContainer.addEventListener("click", (event) => {
+                clearDOM();
+                loadAnimePage(anime);
+            });
 
-        const animeTitle = document.createElement("h3");
-        animeTitle.textContent = name;
+            const animeTitle = document.createElement("h3");
+            animeTitle.textContent = name;
 
-        const animeBanner = document.createElement("img");
-        animeBanner.src = image;
-        animeBanner.loading = "lazy";
+            const animeBanner = document.createElement("img");
+            animeBanner.src = image;
+            animeBanner.loading = "lazy";
 
-        animeContainer.append(animeTitle);
-        animeContainer.append(animeBanner);
-        main.append(animeContainer);
+            animeContainer.append(animeTitle);
 
-        lastSearchedAnime = animeContainer;
-        
-    });
+            //check if anime is already saved
+            await checkForAnime(anime.mal_id).then((value) => {
+                if (value){
+                    const animeSaved = document.createElement("h4");
+                    animeSaved.textContent = "Anime in \"Your Animes\"";
+                    animeSaved.classList.add("savedAnime");
+                    animeContainer.append(animeSaved);
+                }
+            }).catch((error) => {
+                console.log(error);
+            });
+
+            animeContainer.append(animeBanner);
+
+            main.append(animeContainer);
+
+            lastSearchedAnime = animeContainer;
+        }));
+    }catch (error){
+        console.log(error);
+    }
 
     lastSearchedAnime.style.marginBottom = 100+"px";
 
@@ -126,10 +139,12 @@ function clearDOM(){
     document.body.appendChild(footer);
 }
 
+//Anime Page load Functions ===============================================
+
 function loadAnimePage(anime){
     const {title, title_english, images, synopsis, trailer, genres, episodes, status} = anime;
 
-    let prevContainer = loadButtons();
+    let prevContainer = loadButtons(anime);
     title_english ? prevContainer = loadTitle(title_english, prevContainer) : prevContainer = loadTitle(title, prevContainer);
     prevContainer = loadImage(images, prevContainer);
     prevContainer = loadDetails(synopsis, prevContainer);
@@ -141,9 +156,10 @@ function loadAnimePage(anime){
     prevContainer.style.marginBottom = 100+"px";
 }
 
-function loadButtons(){
+function loadButtons(animeObj){
      const container = document.createElement("div");
      container.classList.add("buttons");
+     container.classList.add("fadein");
 
      const backBtn = document.createElement("button");
      backBtn.id = "backBtn";
@@ -159,10 +175,26 @@ function loadButtons(){
      addAnimeBtn.textContent = "Add";
 
      backBtn.addEventListener("click", () => {
+
         location.reload();
+
      });
      addAnimeBtn.addEventListener("click", () => {
 
+        //save to local browser storage using Chrome Storage API
+        //Note : Ensure 'malId' is a string and not a number
+        console.log(`mal id : ${animeObj.mal_id}`)
+        saveAnime(animeObj.mal_id,{
+            "title" : animeObj.title,
+            "title_english" : animeObj.title_english,
+            "images" : animeObj.images,
+            "status" : animeObj.status,
+            "episodes" : animeObj.episodes
+        }).then(() => {
+
+        }).catch((error) => {
+            console.log(error);
+        }); 
      });
 
      container.appendChild(backBtn);
@@ -177,6 +209,7 @@ function loadButtons(){
 function loadTitle(title, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeName");
+    container.classList.add("fadein");
 
     const h2 = document.createElement("h2");
     h2.textContent = title;
@@ -190,6 +223,7 @@ function loadTitle(title, prevContainer){
 function loadImage(image, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeImage");
+    container.classList.add("fadein");
 
     const img = document.createElement("img");
     img.src = image.webp.image_url;
@@ -204,6 +238,7 @@ function loadImage(image, prevContainer){
 function loadDetails(synopsis, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeContent");
+    container.classList.add("fadein");
 
     const h3 = document.createElement("h3");
     h3.textContent = "Summary";
@@ -222,6 +257,7 @@ function loadDetails(synopsis, prevContainer){
 function loadGenres(genres, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeContent");
+    container.classList.add("fadein");
 
     const h3 = document.createElement("h3");
     h3.textContent = "Genres";
@@ -246,6 +282,7 @@ function loadGenres(genres, prevContainer){
 function loadTrailer(url, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeContent");
+    container.classList.add("fadein");
 
     //turn url autoplay off
     url = url.slice(0, url.length - 1) + "0";
@@ -267,6 +304,7 @@ function loadTrailer(url, prevContainer){
 function loadEpisodes(episodes, status, prevContainer){
     const container = document.createElement("div");
     container.classList.add("animeContent");
+    container.classList.add("fadein");
 
     const p = document.createElement("p");
     p.textContent = `Episodes : ${episodes}`;
@@ -282,6 +320,63 @@ function loadEpisodes(episodes, status, prevContainer){
     return container;
 
 }
+
+//END OF Anime Page load Functions ========================================
+
+
+
+//Chrome Storage API functions ============================================
+
+function saveAnime(malId, value){
+    const anime = {
+        [malId] : value
+    }
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.set(anime, () => {
+            if (chrome.runtime.lastError){
+                reject(chrome.runtime.Error);
+            } else {
+                resolve();
+            }
+        });
+    });
+    
+}
+
+function removeAnime(malId){
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.remove([malId], () => {
+            if (chrome.runtime.lastError){
+                reject(chrome.runtime.lastError);
+            } else {
+                resolve();
+            }
+        });
+    });
+}
+
+function getSavedAnime(malId){
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get(null, (result) => {
+            if (chrome.runtime.lastError){
+                reject(chrome.runtime.lastError);
+            } else {
+                return resolve(result[malId]);
+            }
+        });
+    });
+}
+
+async function checkForAnime(malId){
+    const result = await getSavedAnime(malId);
+    if (result){
+        return true;
+    } else {
+        return false;
+    }
+}
+
+//END OF Chrome Storage API functions =====================================
 
 
 
