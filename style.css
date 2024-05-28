@@ -34,7 +34,7 @@ main{
     margin: 0px;
     max-width: 80vh;
 }
-#searchBar{
+#searchBar, #searchUserAnimeBar{
     border-radius: 8px;
     font-family: "Nunito","Sans Serif";
     width: 80%;
@@ -42,11 +42,11 @@ main{
     padding: 5px;
     
 }
-#searchBar:focus{
+#searchBar:focus, #searchUserAnimeBar:focus{
     outline: none;
     border: 2px solid #279708;
 }
-#searchBtn, #backBtn{
+#searchBtn, #backBtn, #searchUserAnimesBtn{
     cursor: pointer;
     border: none;
     background-color: transparent;
@@ -116,6 +116,7 @@ main{
     margin: 5px;
     margin-left: 0px;
     margin-bottom: 0px;
+    margin-bottom: 15px;
     font-size: 18px;
     align-self: flex-start;
 
@@ -128,12 +129,14 @@ main{
     font-size: 15px;
     color: #34ce09;
     margin: 5px;
+    margin-bottom: 15px;
+    margin-top: 0px;
 }
 footer{
     position: absolute;
     bottom: 0;
     left: 0;
-    background-color: #141414fb;
+    background-color: #000000;
     width: 100%;
     padding-top: 20px;
     padding-bottom: 20px;
@@ -147,18 +150,20 @@ footer{
     color: #FFFFFF;
     transition: all 0.5s;
     text-decoration: none;
+    padding-left: 15px;
+    padding-right: 15px;
+    cursor: pointer;
 }
 .homeRow:visited{
     color: #FFFFFF;
 }
-.homeRow a:hover:not(#active){
+.homeRow a:hover:not(.active){
     color: #34ce09;
 }
-#active{
+.active{
     background-color: #34ce09;
     border-radius: 10px;
-    padding-left: 15px;
-    padding-right: 15px;
+    transition: none;
 }
 .buttons{
     display: flex;

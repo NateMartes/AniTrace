@@ -8,24 +8,16 @@
 </head>
 <body>
     <main>
-        <h2 id="header" class="fadein">AniTrace</h2>
+        <h2 id="header" class="fadein">Your Animes</h2>
         <div class="search fadein" >
-            <button id="searchBtn"><img src="magnifying-glass-solid.svg" width="22px"></button>
-            <input type="text" id="searchBar" autocomplete="off"></input>
-        </div>
-        <div id="searchTextHeader" class="fadein" style="display: flex; justify-content: center; align-items: center;">
-            <h2 style="font-size: 30px; text-align: center;">Search for Your Favorite Animes!</h2>
-        </div>
-        <div class="spinner">
-        </div>
-        <div class="error">
-            <h3 id="errorMsg"></h3>
+            <button id="searchUserAnimesBtn"><img src="magnifying-glass-solid.svg" width="22px"></button>
+            <input type="text" id="searchUserAnimeBar" autocomplete="off"></input>
         </div>
     </main>
     <footer>
         <div class="homeRow">
-            <a href="" id="active">Search</a>
-            <a href="">Your Animes</a>
+            <a id="homeRowSearchBtn">Search</a>
+            <a href="" class="active" id="yourAnimesBtn">Your Animes</a>
         </div>
     </footer>
 </body>

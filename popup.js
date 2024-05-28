@@ -14,18 +14,6 @@ async function getAnimeData(anime){
     
 }
 
-const searchBar = document.getElementById("searchBar");
-searchBar.addEventListener("keydown",(event) => {
-    if (event.key === "Enter"){
-        searchAnime(searchBar.value, addAnimeToHomeScreen);
-    }
-});
-
-const button = document.getElementById("searchBtn");
-button.addEventListener("click", () => {
-    searchAnime(searchBar.value, addAnimeToHomeScreen);
-});
-
 function searchAnime(name, useData){
     
     removeSearchedAnimes();
@@ -62,49 +50,13 @@ function showErrorMsg(message){
     errorContainer.style.display = "block";
 
 }
-async function addAnimeToHomeScreen(data){
+async function addAnimeToScreen(data){
     const main = document.getElementsByTagName("main")[0];
 
     let lastSearchedAnime = null;
     try{
         await Promise.all(data.map(async (anime) => {
-            console.log(anime);
-            let name = anime.title_english || anime.title;
-            const image = anime.images.webp.image_url;
-
-            const animeContainer = document.createElement("div");
-            animeContainer.classList.add("searchedAnime");
-            animeContainer.addEventListener("click", (event) => {
-                clearDOM();
-                loadAnimePage(anime);
-            });
-
-            const animeTitle = document.createElement("h3");
-            animeTitle.textContent = name;
-
-            const animeBanner = document.createElement("img");
-            animeBanner.src = image;
-            animeBanner.loading = "lazy";
-
-            animeContainer.append(animeTitle);
-
-            //check if anime is already saved
-            await checkForAnime(anime.mal_id).then((value) => {
-                if (value){
-                    const animeSaved = document.createElement("h4");
-                    animeSaved.textContent = "In \"Your Animes\"";
-                    animeSaved.classList.add("savedAnime");
-                    animeContainer.append(animeSaved);
-                }
-            }).catch((error) => {
-                console.log(error);
-            });
-
-            animeContainer.append(animeBanner);
-
-            main.append(animeContainer);
-
-            lastSearchedAnime = animeContainer;
+            lastSearchedAnime = await loadSearchedAnime(anime, main);
         }));
     }catch (error){
         console.log(error);
@@ -115,6 +67,48 @@ async function addAnimeToHomeScreen(data){
     const spinner = document.getElementsByClassName("spinner")[0];
     spinner.classList.remove("loading");
     
+}
+async function loadSearchedAnime(anime, main, yourAnimes){
+    let name = anime.title_english || anime.title;
+    const image = anime.images.webp.image_url;
+
+    const animeContainer = document.createElement("div");
+    animeContainer.classList.add("searchedAnime");
+    animeContainer.classList.add("fadein");
+    animeContainer.addEventListener("click", (event) => {
+        clearDOM();
+        loadAnimeElements(anime);
+    });
+
+    const animeTitle = document.createElement("h3");
+    animeTitle.textContent = name;
+
+    const animeBanner = document.createElement("img");
+    animeBanner.src = image;
+    animeBanner.loading = "lazy";
+
+    animeContainer.append(animeTitle);
+
+    //if 'yourAnimes' is true, this means that the anime is know already to be in user's data
+    //if false, this means that we aren't sure if the anime is in user's data so we should probably check
+    if (!yourAnimes){
+        await checkForAnime(anime.mal_id).then((value) => {
+            if (value){
+                const animeSaved = document.createElement("h4");
+                animeSaved.textContent = "In \"Your Animes\"";
+                animeSaved.classList.add("savedAnime");
+                animeContainer.append(animeSaved);
+            }
+        }).catch((error) => {
+            console.log(error);
+        });
+    }
+
+    animeContainer.append(animeBanner);
+
+    main.append(animeContainer);
+
+    return animeContainer;
 }
 
 function removeSearchedAnimes(){
@@ -141,7 +135,7 @@ function clearDOM(){
 
 //Anime Page load Functions ===============================================
 
-function loadAnimePage(anime){
+function loadAnimeElements(anime){
     const {title, title_english, images, synopsis, trailer, genres, episodes, status} = anime;
 
     let prevContainer = loadButtons(anime);
@@ -322,6 +316,94 @@ function loadEpisodes(episodes, status, prevContainer){
 
 //END OF Anime Page load Functions ========================================
 
+// AniTrace Search Screen
+
+document.getElementById("homeRowSearchBtn").addEventListener("click", (event) => {
+    event.target.classList.add("active");
+
+    const yourAnimesBtn = document.getElementById("yourAnimesBtn");
+    yourAnimesBtn.classList.remove("active");
+
+    clearDOM();
+    loadSearchElements();
+})
+
+function loadSearchElements(){
+    const main = document.getElementsByTagName("main")[0];
+
+    const mainHeader = document.createElement("h2");
+    mainHeader.id = "header";
+    mainHeader.classList.add("fadein");
+    mainHeader.textContent = "AniTrace";
+
+    main.appendChild(mainHeader);
+
+    const searchContainer = document.createElement("div");
+    searchContainer.classList.add("search");
+    searchContainer.classList.add("fadein");
+    
+    const searchBtn = document.createElement("button");
+    searchBtn.id = "searchBtn";
+
+    searchBtn.addEventListener("click", () => {
+        searchAnime(document.getElementById("searchBar").value, addAnimeToScreen);
+    });
+
+    const img = document.createElement("img");
+    img.src = "magnifying-glass-solid.svg";
+    img.style.width = 22+"px";
+
+    searchBtn.appendChild(img);
+
+    searchContainer.appendChild(searchBtn);
+
+    const textbox = document.createElement("input");
+    textbox.type = "text";
+    textbox.id = "searchBar";
+    textbox.autocomplete = "off";
+
+    textbox.addEventListener("keydown",(event) => {
+        if (event.key === "Enter"){
+            searchAnime(textbox.value, addAnimeToScreen);
+        }
+    });
+
+    searchContainer.appendChild(textbox);
+
+    main.appendChild(searchContainer);
+
+    const searchTextHeader = document.createElement("div");
+    searchTextHeader.classList.add("fadein");
+    searchTextHeader.style.display = "flex";
+    searchTextHeader.style.justifyContent = "center";
+    searchTextHeader.style.alignItems = "center";
+    searchTextHeader.id = "searchTextHeader";
+
+    const h2 = document.createElement("h2");
+    h2.style.fontSize = 30+"px";
+    h2.style.textAlign = "center";
+    h2.textContent = "Search for Your Favorite Animes!";
+
+    searchTextHeader.appendChild(h2);
+    
+    main.appendChild(searchTextHeader);
+
+    const spinner = document.createElement("div");
+    spinner.classList.add("spinner");
+
+    main.appendChild(spinner);
+
+    const error = document.createElement("div");
+    error.classList.add("error");
+
+    const h3 = document.createElement("h3");
+    h3.id = "errorMsg";
+
+    error.appendChild(h3);
+
+    main.appendChild(error);
+
+}
 
 
 //Chrome Storage API functions ============================================
@@ -354,6 +436,17 @@ function removeAnime(malId){
     });
 }
 
+function getAllSavedAnime(){
+    return new Promise((resolve, reject) => {
+        chrome.storage.sync.get(null, (result) => {
+            if (chrome.runtime.lastError){
+                reject(chrome.runtime.lastError);
+            } else {
+                return resolve(result);
+            }
+        });
+    });
+}
 function getSavedAnime(malId){
     return new Promise((resolve, reject) => {
         chrome.storage.sync.get(null, (result) => {
@@ -376,6 +469,48 @@ async function checkForAnime(malId){
 }
 
 //END OF Chrome Storage API functions =====================================
+
+
+//onload
+
+async function loadUserAnimes(){
+    const result = await getAllSavedAnime();
+    if (!result){
+        return
+    }
+    let prevAnime = null;
+
+    const main = document.getElementsByTagName("main")[0];
+    try{
+        await Promise.all(Object.keys(result).map(async (anime) => {
+            animeContainer = await loadSearchedAnime(result[anime], main, true);
+            userAnimes[(result[anime].title_english || result[anime].title)] = animeContainer;
+            prevAnime = animeContainer;
+            console.log(userAnimes);
+        }));
+    } catch (error){
+        console.log(error);
+    }
+    
+
+    prevAnime.style.marginBottom = 100+"px";
+}
+
+let userAnimes = {};
+
+loadUserAnimes();
+
+document.getElementById("searchUserAnimeBar").addEventListener("keyup", (event) => {
+    const text = new RegExp(`^${event.target.value}`)
+    Object.keys(userAnimes).forEach((animeName) => {
+        if (animeName.match(text)){
+            userAnimes[animeName].style.display = "flex";
+        } else {
+            userAnimes[animeName].style.display = "none";
+        }
+        
+    });
+})
 
 
 

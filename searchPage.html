@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script defer src="popup.js"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <main>
+        <h2 id="header" class="fadein">AniTrace</h2>
+        <div class="search fadein" >
+            <button id="searchBtn"><img src="magnifying-glass-solid.svg" width="22px"></button>
+            <input type="text" id="searchBar" autocomplete="off"></input>
+        </div>
+        <div id="searchTextHeader" class="fadein" style="display: flex; justify-content: center; align-items: center;">
+            <h2 style="font-size: 30px; text-align: center;">Search for Your Favorite Animes!</h2>
+        </div>
+        <div class="spinner">
+        </div>
+        <div class="error">
+            <h3 id="errorMsg"></h3>
+        </div>
+    </main>
+    <footer>
+        <div class="homeRow">
+            <a class="active" id="homeRowSearchBtn">Search</a>
+            <a id="yourAnimesBtn">Your Animes</a>
+        </div>
+    </footer>
+</body>
+</html>=
