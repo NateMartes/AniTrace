@@ -92,7 +92,7 @@ async function addAnimeToHomeScreen(data){
             await checkForAnime(anime.mal_id).then((value) => {
                 if (value){
                     const animeSaved = document.createElement("h4");
-                    animeSaved.textContent = "Anime in \"Your Animes\"";
+                    animeSaved.textContent = "In \"Your Animes\"";
                     animeSaved.classList.add("savedAnime");
                     animeContainer.append(animeSaved);
                 }
@@ -182,7 +182,6 @@ function loadButtons(animeObj){
      addAnimeBtn.addEventListener("click", () => {
 
         //save to local browser storage using Chrome Storage API
-        //Note : Ensure 'malId' is a string and not a number
         console.log(`mal id : ${animeObj.mal_id}`)
         saveAnime(animeObj.mal_id,{
             "title" : animeObj.title,
