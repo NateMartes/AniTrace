@@ -75,10 +75,6 @@ async function loadSearchedAnime(anime, main, yourAnimes){
     const animeContainer = document.createElement("div");
     animeContainer.classList.add("searchedAnime");
     animeContainer.classList.add("fadein");
-    animeContainer.addEventListener("click", (event) => {
-        clearDOM();
-        loadAnimeElements(anime);
-    });
 
     const animeTitle = document.createElement("h3");
     animeTitle.textContent = name;
@@ -94,6 +90,7 @@ async function loadSearchedAnime(anime, main, yourAnimes){
     if (!yourAnimes){
         await checkForAnime(anime.mal_id).then((value) => {
             if (value){
+                yourAnimes = true;
                 const animeSaved = document.createElement("h4");
                 animeSaved.textContent = "In \"Your Animes\"";
                 animeSaved.classList.add("savedAnime");
@@ -103,6 +100,19 @@ async function loadSearchedAnime(anime, main, yourAnimes){
             console.log(error);
         });
     }
+
+    animeContainer.addEventListener("click", (event) => {
+        clearDOM();
+        yourAnimes ? loadAnimeElements({
+            "title" : anime.title,
+            "title_english" : anime.title_english,
+            "images" : anime.images,
+            "status" : anime.status,
+            "episodes" : anime.episodes,
+            "mal_id" : anime.mal_id,
+            "episodesWatched":anime.episodesWatched
+        }, yourAnimes) : loadAnimeElements(anime);
+    });
 
     animeContainer.append(animeBanner);
 
@@ -135,22 +145,74 @@ function clearDOM(){
 
 //Anime Page load Functions ===============================================
 
-function loadAnimeElements(anime){
-    const {title, title_english, images, synopsis, trailer, genres, episodes, status} = anime;
+function loadAnimeElements(anime, isSavedAnime){
+    const {title, title_english, images, synopsis, trailer, genres, episodes, status, episodesWatched} = anime;
 
-    let prevContainer = loadButtons(anime);
+    let prevContainer = null
+    if (!isSavedAnime){
+        prevContainer = loadButtons(anime);
+    } else {
+        console.log(anime);
+        prevContainer = loadButtons(anime,isSavedAnime);
+    }
     title_english ? prevContainer = loadTitle(title_english, prevContainer) : prevContainer = loadTitle(title, prevContainer);
     prevContainer = loadImage(images, prevContainer);
-    prevContainer = loadDetails(synopsis, prevContainer);
-    prevContainer = loadGenres(genres, prevContainer);
-    if (trailer.embed_url){
+    if (synopsis){
+        prevContainer = loadDetails(synopsis, prevContainer);
+    }
+    if (genres){
+        prevContainer = loadGenres(genres, prevContainer);
+    }
+    if (trailer && trailer.embed_url){
         prevContainer = loadTrailer(trailer.embed_url, prevContainer);
     }
+
     prevContainer = loadEpisodes(episodes, status, prevContainer);
+
+    if (isSavedAnime){
+        for (let i=1; i<=episodes; i++){
+            const episodeContainer = document.createElement("div");
+            episodeContainer.classList.add("animeContent");
+            episodeContainer.classList.add("episode");
+
+            const main = document.getElementsByTagName("main")[0];
+
+            const episode = document.createElement("p");
+            episode.textContent = `Episode ${i}`;
+
+            const checkBoxContainer = document.createElement("div");
+            const checkBox = document.createElement("input");
+            checkBox.type = "checkbox";
+            const checkmark = document.createElement("span");
+            checkmark.classList.add("checkmark");
+
+            checkBoxContainer.appendChild(checkBox);
+            checkBoxContainer.appendChild(checkmark);
+            checkBoxContainer.style.position = "relative";
+
+            checkBox.checked = episodesWatched[i-1];
+
+            checkBox.addEventListener("click", () => {
+                if (checkBox.checked != episodesWatched[i-1]){
+                    episodesWatched[i-1] = checkBox.checked;
+                    console.log(episodesWatched);
+                    saveAnime(anime.mal_id, anime);
+                }
+            });
+
+            episodeContainer.appendChild(episode);
+            episodeContainer.appendChild(checkBoxContainer);
+
+            main.appendChild(episodeContainer);
+
+            prevContainer = episodeContainer;
+        }
+    }
     prevContainer.style.marginBottom = 100+"px";
 }
 
-function loadButtons(animeObj){
+function loadButtons(animeObj, isSavedAnime){
+    console.log(animeObj);
      const container = document.createElement("div");
      container.classList.add("buttons");
      container.classList.add("fadein");
@@ -164,34 +226,60 @@ function loadButtons(animeObj){
 
      backBtn.appendChild(backBtnImage);
 
-     const addAnimeBtn = document.createElement("button");
-     addAnimeBtn.id = "addAnimeBtn";
-     addAnimeBtn.textContent = "Add";
+
+     const animeBtn = document.createElement("button");
+     animeBtn.id = "addAnimeBtn";
+     if (isSavedAnime){
+        animeBtn.textContent = "Remove";
+     }  else {
+        animeBtn.textContent = "Add";
+     }
+     
 
      backBtn.addEventListener("click", () => {
 
         location.reload();
 
      });
-     addAnimeBtn.addEventListener("click", () => {
+     animeBtn.addEventListener("click", () => {
 
-        //save to local browser storage using Chrome Storage API
-        console.log(`mal id : ${animeObj.mal_id}`)
-        saveAnime(animeObj.mal_id,{
-            "title" : animeObj.title,
-            "title_english" : animeObj.title_english,
-            "images" : animeObj.images,
-            "status" : animeObj.status,
-            "episodes" : animeObj.episodes
-        }).then(() => {
+        if (isSavedAnime){
+            removeAnime(animeObj.mal_id)
+            .then(() => {
+                
+                container.removeChild(animeBtn);
+                loadMessage("Anime Successfully Removed");
+            })
+            .catch((error) => {
+                console.log(error);
+            });
 
-        }).catch((error) => {
-            console.log(error);
-        }); 
-     });
+        } else {
 
+            //save to local browser storage using Chrome Storage API
+
+            saveAnime(animeObj.mal_id,{
+                "title" : animeObj.title,
+                "title_english" : animeObj.title_english,
+                "images" : animeObj.images,
+                "status" : animeObj.status,
+                "episodes" : animeObj.episodes,
+                "mal_id": animeObj.mal_id,
+                "episodesWatched": []
+            }).then(() => {
+                
+                //inform user that the anime has been added
+                container.removeChild(animeBtn);
+                loadMessage("Anime Successfully Added!");
+
+            }).catch((error) => {
+                console.log(error);
+            }); 
+        }
+        
+    });
      container.appendChild(backBtn);
-     container.appendChild(addAnimeBtn);
+     container.appendChild(animeBtn);
 
      const main = document.getElementsByTagName("main")[0];
      main.prepend(container);
@@ -300,7 +388,8 @@ function loadEpisodes(episodes, status, prevContainer){
     container.classList.add("fadein");
 
     const p = document.createElement("p");
-    p.textContent = `Episodes : ${episodes}`;
+    episodes ? p.textContent = `Episodes : ${episodes}` : p.textContent = `Episodes : Unkown`;
+    
 
     const p2 = document.createElement("p");
     p2.textContent = `Status : ${status}`;
@@ -311,6 +400,32 @@ function loadEpisodes(episodes, status, prevContainer){
     prevContainer.insertAdjacentElement("afterEnd", container);
 
     return container;
+
+}
+
+function loadMessage(value){
+    const main = document.getElementsByTagName("main")[0];
+
+    const messageContainer = document.createElement("div");
+    messageContainer.classList.add("popupMessage");
+    messageContainer.classList.add("fadein");
+
+    const message = document.createElement("h2");
+    message.textContent = value;
+
+    messageContainer.appendChild(message);
+
+    main.append(messageContainer);
+
+    setTimeout(() => {
+        messageContainer.classList.add("fadeOut");
+        //wait for animation to finish
+        setTimeout(() => {
+            main.removeChild(messageContainer);
+            location.reload();
+        }, 1000);
+
+    }, 2000);
 
 }
 
@@ -426,10 +541,11 @@ function saveAnime(malId, value){
 
 function removeAnime(malId){
     return new Promise((resolve, reject) => {
-        chrome.storage.sync.remove([malId], () => {
+        chrome.storage.sync.remove([String(malId)], () => {
             if (chrome.runtime.lastError){
                 reject(chrome.runtime.lastError);
             } else {
+                console.log("Anime Removed")
                 resolve();
             }
         });
@@ -461,6 +577,8 @@ function getSavedAnime(malId){
 
 async function checkForAnime(malId){
     const result = await getSavedAnime(malId);
+    const allAnimes = await getAllSavedAnime();
+    console.log(allAnimes);
     if (result){
         return true;
     } else {
@@ -475,6 +593,7 @@ async function checkForAnime(malId){
 
 async function loadUserAnimes(){
     const result = await getAllSavedAnime();
+    console.log(result);
     if (!result){
         return
     }
@@ -486,14 +605,20 @@ async function loadUserAnimes(){
             animeContainer = await loadSearchedAnime(result[anime], main, true);
             userAnimes[(result[anime].title_english || result[anime].title)] = animeContainer;
             prevAnime = animeContainer;
-            console.log(userAnimes);
+            
         }));
     } catch (error){
         console.log(error);
     }
     
+    if (prevAnime){
+        prevAnime.style.marginBottom = 100+"px";
+    } else {
 
-    prevAnime.style.marginBottom = 100+"px";
+        //tell user no animes exists
+        
+    }
+    
 }
 
 let userAnimes = {};
@@ -501,17 +626,16 @@ let userAnimes = {};
 loadUserAnimes();
 
 document.getElementById("searchUserAnimeBar").addEventListener("keyup", (event) => {
-    const text = new RegExp(`^${event.target.value}`)
+    const text = new RegExp(`^${event.target.value.toLowerCase()}`)
     Object.keys(userAnimes).forEach((animeName) => {
-        if (animeName.match(text)){
+        if (animeName.toLowerCase().match(text)){
             userAnimes[animeName].style.display = "flex";
         } else {
             userAnimes[animeName].style.display = "none";
         }
         
     });
-})
-
+});
 
 
 
